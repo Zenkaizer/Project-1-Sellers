@@ -28,7 +28,6 @@ class ETL:
         df2['date'] = pd.to_datetime(df['date'])
 
         # Extract the day, month and year in separate columns.
-        df2['day'] = df['date'].dt.day
         df2['month'] = df['date'].dt.month
         df2['year'] = df['date'].dt.year
 
@@ -37,7 +36,7 @@ class ETL:
                   9: 'September', 10: 'October', 11: 'November', 12: 'December'}
 
         # Apply the mapping to the 'Mes' column to get the name of the month in Spanish.
-        df2['month'] = df2['month'].map(months)
+        df2['month_name'] = df2['month'].map(months)
 
         return df2
 
