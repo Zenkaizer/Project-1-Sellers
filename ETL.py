@@ -57,23 +57,26 @@ class ETL:
 
     @staticmethod
     def __generate_phone_number(df):
+        # Generate a random phone for each salesman
         phone_numbers = [str(random.randint(10000000, 99999999)) for _ in range(len(df))]
         df['contact_number'] = phone_numbers
 
     @staticmethod
     def __generate_price_cost(df, cost):
+        # Generate a random price and production cost for each product
         price = [random.randint(100, 999) for _ in range(len(df))]
         df['price'] = price
         df['cost'] = (df['price'] * cost).astype(int)
 
     @staticmethod
     def __sum_equal_columns(df):
+        # Sum up the units sold for the same salesmen, product, and date
         df_sum = df.groupby(['date', 'representative', 'product_code'], as_index=False).sum()
         return df_sum
 
     @staticmethod
     def __generate_id_time(df_time):
-        # Eliminamos las filas duplicadas basándonos en las columnas 'date'
+        # Remove duplicate rows based on the 'date' column
         df_time = df_time.drop_duplicates(subset=['date'])
 
         df_time['id'] = range(1, len(df_time) + 1)
@@ -82,8 +85,11 @@ class ETL:
 
     def transform_table_sells(self, df_time, df_sells):
         df_sells = self.__sum_equal_columns(df_sells)
+
+        # An 'id_time' field is added to 'sells', which is a foreign key referencing the 'time' table
         df_sells['id_time'] = pd.merge(df_sells, df_time, on='date', how='left')['id']
 
+        # The 'date' field is removed from the 'sells' table
         df_sells = df_sells.drop('date', axis=1)
         return df_sells
 
