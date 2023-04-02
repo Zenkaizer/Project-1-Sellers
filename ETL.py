@@ -1,5 +1,6 @@
 import random
-
+from Connect import Connect
+import mysql.connector
 import openpyxl
 import pandas as pd
 import unicodedata
@@ -21,8 +22,6 @@ class ETL:
         df = pd.read_excel(name, sheet_name=sheet)
         return self.__normalize(df)
 
-
-    # region Generate Methods
     @staticmethod
     def __generate_month_column(df):
         df['month'] = df['date'].dt.month
@@ -67,20 +66,13 @@ class ETL:
         df['price'] = price
         df['cost'] = (df['price'] * cost).astype(int)
 
-    # endregion
+    @staticmethod
+    def __sum_equal_columns(df):
+        df_sum = df.groupby(['date', 'representative', 'product_code'], as_index=False).sum()
+        return df_sum
 
     def transform_table1(self, df):
-        # Convert the date column to a date object.
-        df_new = pd.DataFrame()
-        df_new['date'] = pd.to_datetime(df['date'])
-
-        # Extract the day, month and year in separate columns.
-        self.__generate_month_column(df_new)
-        self.__generate_year_column(df_new)
-
-        self.__generate_month_column(df_new)
-
-        return df_new
+        return self.__sum_equal_columns(df)
 
     def transform_table2(self, df):
         self.__separate_representative(df)
@@ -93,3 +85,137 @@ class ETL:
         self.__generate_price_cost(df, 0.8)
 
         return df
+
+    def transform_table4(self, df):
+        # Convert the date column to a date object.
+        df_new = pd.DataFrame()
+        df_new['date'] = pd.to_datetime(df['date'])
+
+        # Extract the day, month and year in separate columns.
+        self.__generate_month_column(df_new)
+        self.__generate_month_name(df_new)
+        self.__generate_year_column(df_new)
+
+        return df_new
+
+"""
+
+    @staticmethod
+    def load_table1(df):
+        conn = Connect.connect()
+        cursor = conn.cursor()
+
+        table_name = 'sells'
+        created_table = False
+
+        Connect.drop_table(cursor, table_name)
+
+        try:
+            cursor.execute(f"CREATE TABLE {table_name} "
+                           f"(id INT NOT NULL AUTO_INCREMENT, date VARCHAR(255), representative VARCHAR(255), "
+                           f"product_code VARCHAR(255), units VARCHAR(255), PRIMARY KEY (id))")
+            created_table = True
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+
+        if created_table:
+            sql = f"INSERT INTO {table_name} " \
+                  f"(date, representative, product_code, units) VALUES (%s,%s,%s,%s)"
+            for row in df.itertuples(index=False):
+                cursor.execute(sql, row)
+            conn.commit()
+
+        cursor.close()
+        conn.close()
+
+    @staticmethod
+    def load_table2(df):
+
+        conn = Connect.connect()
+        cursor = conn.cursor()
+
+        table_name = 'client'
+        created_table = False
+
+        Connect.drop_table(cursor, table_name)
+
+        try:
+            cursor.execute(f"CREATE TABLE {table_name} "
+                           f"(representative VARCHAR(255), region VARCHAR(255), first_name VARCHAR(255), "
+                           f"last_name VARCHAR(255), email VARCHAR(255), contact_number VARCHAR(255), "
+                           f"PRIMARY KEY (representative))")
+            created_table = True
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+
+        if created_table:
+            sql = f"INSERT INTO {table_name} " \
+                  f"(representative, region, first_name, last_name, email, contact_number) VALUES (%s,%s,%s,%s,%s,%s)"
+            for row in df.itertuples(index=False):
+                cursor.execute(sql, row)
+            conn.commit()
+
+        cursor.close()
+        conn.close()
+
+    @staticmethod
+    def load_table3(df):
+        conn = Connect.connect()
+        cursor = conn.cursor()
+
+        table_name = 'products'
+        created_table = False
+
+        Connect.drop_table(cursor, table_name)
+
+        try:
+            cursor.execute(f"CREATE TABLE {table_name} "
+                           f"(product_code VARCHAR(255), description VARCHAR(255), price INT, "
+                           f"cost INT, PRIMARY KEY (product_code))")
+            created_table = True
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+
+        if created_table:
+            sql = f"INSERT INTO {table_name} " \
+                  f"(product_code, description, price, cost) VALUES (%s,%s,%s,%s)"
+            for row in df.itertuples(index=False):
+                cursor.execute(sql, row)
+            conn.commit()
+
+        cursor.close()
+        conn.close()
+
+    @staticmethod
+    def load_table4(df):
+        conn = Connect.connect()
+        cursor = conn.cursor()
+
+        table_name = 'time'
+        created_table = False
+
+        Connect.drop_table(cursor, table_name)
+
+        try:
+            cursor.execute(f"CREATE TABLE {table_name} "
+                           f"(id INT NOT NULL AUTO_INCREMENT, date VARCHAR(255), month INT, month_name VARCHAR(255), "
+                           f"year INT, PRIMARY KEY (id))")
+            created_table = True
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+
+        if created_table:
+            sql = f"INSERT INTO {table_name} " \
+                  f"(date, month, month_name, year) VALUES (%s,%s,%s,%s)"
+            for row in df.itertuples(index=False):
+                cursor.execute(sql, row)
+            conn.commit()
+
+        cursor.close()
+        conn.close()
+
+"""
