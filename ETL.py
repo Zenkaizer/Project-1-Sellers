@@ -114,6 +114,11 @@ class ETL:
         self.__generate_month_column(df_new)
         self.__generate_month_name(df_new)
         self.__generate_year_column(df_new)
+        self.__generate_day_column
         return self.__generate_id_time(df_new)
+    @staticmethod
+    def __generate_day_column(df):
+        # Extract the day from each date and store it in a new column 'day'.
+        df['day'] = df['date'].dt.day
 
 
