@@ -21,30 +21,32 @@ class ETL:
         df = pd.read_excel(name, sheet_name=sheet)
         return self.__normalize(df)
 
+
+    # region Generate Methods
     @staticmethod
-    def transform_table1(df):
-        # Convert the date column to a date object.
-        df2 = pd.DataFrame()
-        df2['date'] = pd.to_datetime(df['date'])
+    def __generate_month_column(df):
+        df['month'] = df['date'].dt.month
 
-        # Extract the day, month and year in separate columns.
-        df2['month'] = df['date'].dt.month
-        df2['year'] = df['date'].dt.year
+    @staticmethod
+    def __generate_year_column(df):
+        df['year'] = df['date'].dt.year
 
+    @staticmethod
+    def __generate_month_name(df):
         # Create a dictionary to map month numbers to month names in Spanish.
         months = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August',
                   9: 'September', 10: 'October', 11: 'November', 12: 'December'}
 
-        # Apply the mapping to the 'Mes' column to get the name of the month in Spanish.
-        df2['month_name'] = df2['month'].map(months)
-
-        return df2
+        # Apply the mapping to the 'month' column to get the name of the month in Spanish.
+        df['month_name'] = df['month'].map(months)
 
     @staticmethod
-    def transform_table2(df):
+    def __separate_representative(df):
         # Split the column 'Representante' into two columns 'first_name' and 'last_name'.
-        df[['first_name', 'last_name']] = df['Representante'].str.split(' ', 1, expand=True)
+        df[['first_name', 'last_name']] = df['representative'].str.split(' ', 1, expand=True)
 
+    @staticmethod
+    def __generate_email(df):
         # Create the column 'email' by concatenating 'first_name', 'last_name' and '@work.com'.
         df['email'] = (df['first_name'] + df['last_name'] + '@work.com').str.lower()
 
@@ -53,17 +55,41 @@ class ETL:
             lambda x: unicodedata.normalize('NFD', x).encode('ascii', 'ignore').decode('utf-8'))
 
         df['email'] = df['email'].str.replace('ñ', 'n')
-        df = df.drop('first_name', axis=1)
 
+    @staticmethod
+    def __generate_phone_number(df):
         phone_numbers = [str(random.randint(10000000, 99999999)) for _ in range(len(df))]
         df['contact_number'] = phone_numbers
 
-        return df
-
     @staticmethod
-    def transform_table3(df):
+    def __generate_price_cost(df, cost):
         price = [random.randint(100, 999) for _ in range(len(df))]
         df['price'] = price
-        df['cost'] = (df['price'] * 0.8).astype(int)
+        df['cost'] = (df['price'] * cost).astype(int)
+
+    # endregion
+
+    def transform_table1(self, df):
+        # Convert the date column to a date object.
+        df_new = pd.DataFrame()
+        df_new['date'] = pd.to_datetime(df['date'])
+
+        # Extract the day, month and year in separate columns.
+        self.__generate_month_column(df_new)
+        self.__generate_year_column(df_new)
+
+        self.__generate_month_column(df_new)
+
+        return df_new
+
+    def transform_table2(self, df):
+        self.__separate_representative(df)
+        self.__generate_email(df)
+        self.__generate_phone_number(df)
+
+        return df
+
+    def transform_table3(self, df):
+        self.__generate_price_cost(df, 0.8)
 
         return df
