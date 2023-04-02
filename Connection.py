@@ -21,7 +21,7 @@ class Connection:
                           "contact_number VARCHAR(255), PRIMARY KEY(representative))")
         my_cursor.execute("CREATE TABLE products (product_code VARCHAR(255), description VARCHAR(255), price "
                           "INT, cost INT, PRIMARY KEY(product_code))")
-        my_cursor.execute("CREATE TABLE time (date DATETIME, month INT, year INT, month_name VARCHAR(255), id INT"
+        my_cursor.execute("CREATE TABLE time (date DATETIME, month INT, year INT, month_name VARCHAR(255), day INT, id INT"
                           ", PRIMARY KEY(id))")
         my_cursor.execute("CREATE TABLE sells (representative VARCHAR(255), product_code VARCHAR(255), units INT, "
                           "id_time INT NOT NULL, PRIMARY KEY(representative, product_code, id_time), "
@@ -49,9 +49,11 @@ class Connection:
             my_cursor.execute("INSERT INTO products(product_code, description, price, cost) "
                               "VALUES (%s, %s, %s, %s)", tuple(row))
         for row in data_time:
-            my_cursor.execute("INSERT INTO time(date, month, month_name, year, id) VALUES (%s, %s, %s, %s, %s)", tuple(row))
+            my_cursor.execute("INSERT INTO time(date, month, month_name, year, day, id) VALUES (%s, %s, %s, %s, %s, %s)",
+                              tuple(row))
         for row in data_sells:
-            my_cursor.execute("INSERT INTO sells(representative, product_code, units, id_time) VALUES (%s, %s, %s, %s)", tuple(row))
+            my_cursor.execute("INSERT INTO sells(representative, product_code, units, id_time) VALUES (%s, %s, %s, %s)",
+                              tuple(row))
 
         # Save the changes and close the database connection
         self._my_db.commit()
