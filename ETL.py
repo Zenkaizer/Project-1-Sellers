@@ -1,5 +1,4 @@
 import random
-from Connect import Connect
 import mysql.connector
 import openpyxl
 import pandas as pd
