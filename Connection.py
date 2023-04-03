@@ -1,6 +1,4 @@
-import pandas as pd
 import mysql.connector
-import sqlite3
 
 
 class Connection:
@@ -9,8 +7,8 @@ class Connection:
         self._my_db = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="Monstax514",
-            database="project"
+            password="root",
+            database="seed"
         )
 
     def create_tables(self):
@@ -23,7 +21,8 @@ class Connection:
                           ", PRIMARY KEY(representative))")
         my_cursor.execute("CREATE TABLE products (product_code VARCHAR(255), description VARCHAR(255), price "
                           "INT, cost INT, PRIMARY KEY(product_code))")
-        my_cursor.execute("CREATE TABLE time (date DATETIME, month INT, month_name VARCHAR(255), year INT, day INT, id INT"
+        my_cursor.execute("CREATE TABLE time (date DATETIME, month INT, month_name VARCHAR(255), year INT, day INT, "
+                          "id INT"
                           ", PRIMARY KEY(id))")
         my_cursor.execute("CREATE TABLE sells (representative VARCHAR(255), "
                           "product_code VARCHAR(255), units INT, id_time INT NOT NULL,"
@@ -46,7 +45,8 @@ class Connection:
 
         # Iterate through each row of the NumPy array and insert each row into the MySQL table
         for row in data_salesmen:
-            my_cursor.execute("INSERT INTO salesmen(representative, region, id_region, last_name, email, contact_number)"
+            my_cursor.execute("INSERT INTO salesmen(representative, region, id_region, last_name, email, "
+                              "contact_number)"
                               " VALUES (%s, %s, %s, %s, %s, %s)", tuple(row))
         for row in data_products:
             my_cursor.execute("INSERT INTO products(product_code, description, price, cost) "
