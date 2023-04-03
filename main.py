@@ -1,7 +1,6 @@
 from ETL import ETL
 import openpyxl
 import pandas as pd
-from xlsxwriter import Workbook
 from Connection import Connection
 
 etl = ETL()
@@ -18,8 +17,7 @@ table_sells = etl.transform_table_sells(table_time, table_sells)
 
 connection = Connection()
 connection.create_tables()
-connection.load_data(table_salesmen,table_products, table_time, table_sells)
-
+connection.load_data(table_salesmen, table_products, table_time, table_sells)
 
 
 
