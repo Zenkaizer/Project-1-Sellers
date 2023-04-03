@@ -21,8 +21,6 @@ class ETL:
         df = pd.read_excel(name, sheet_name=sheet)
         return self.__normalize(df)
 
-
-    # region Generate Methods
     @staticmethod
     def __generate_month_column(df):
         df['month'] = df['date'].dt.month
@@ -34,8 +32,8 @@ class ETL:
     @staticmethod
     def __generate_month_name(df):
         # Create a dictionary to map month numbers to month names in Spanish.
-        months = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August',
-                  9: 'September', 10: 'October', 11: 'November', 12: 'December'}
+        months = {1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
+                  9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'}
 
         # Apply the mapping to the 'month' column to get the name of the month in Spanish.
         df['month_name'] = df['month'].map(months)
@@ -67,29 +65,54 @@ class ETL:
         df['price'] = price
         df['cost'] = (df['price'] * cost).astype(int)
 
-    # endregion
+    @staticmethod
+    def __sum_equal_columns(df):
+        df_sum = df.groupby(['id_time', 'representative', 'product_code'], as_index=False).sum()
+        return df_sum
 
-    def transform_table1(self, df):
+    @staticmethod
+    def __create_id_region(df):
+        # Create a dictionary to map month numbers to month names in Spanish.
+        id_region = {'Norte': 1, 'Sur': 2, 'Este': 3, 'Oeste': 4}
+
+        # Apply the mapping to the 'Mes' column to get the name of the month in Spanish.
+        df['id_region'] = df['region'].map(id_region)
+
+        return df
+
+    def transform_table_salesmen(self, df):
+        df = self.__create_id_region(df)
+        self.__separate_representative(df)
+        self.__generate_email(df)
+        self.__generate_phone_number(df)
+        df = df.drop('first_name', axis=1)
+        return df
+
+    def transform_table_products(self, df):
+        self.__generate_price_cost(df, 0.8)
+
+        return df
+
+    def transform_table_time(self, df):
         # Convert the date column to a date object.
         df_new = pd.DataFrame()
         df_new['date'] = pd.to_datetime(df['date'])
 
         # Extract the day, month and year in separate columns.
         self.__generate_month_column(df_new)
+        self.__generate_month_name(df_new)
         self.__generate_year_column(df_new)
 
-        self.__generate_month_column(df_new)
+        # Eliminamos las filas duplicadas basándonos en las columnas 'date'
+        df_new = df_new.drop_duplicates(subset=['date'])
+
+        df_new['id'] = range(1, len(df_new) + 1)
 
         return df_new
 
-    def transform_table2(self, df):
-        self.__separate_representative(df)
-        self.__generate_email(df)
-        self.__generate_phone_number(df)
+    def transform_table_sells(self, df_time, df_sells):
 
-        return df
+        df_sells['id_time'] = pd.merge(df_sells, df_time, on='date', how='left')['id']
+        df_sells = df_sells.drop('date', axis=1)
+        return self.__sum_equal_columns(df_sells)
 
-    def transform_table3(self, df):
-        self.__generate_price_cost(df, 0.8)
-
-        return df
