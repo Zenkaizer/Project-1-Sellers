@@ -63,6 +63,7 @@ class ETL:
 
     @staticmethod
     def __generate_price_cost(df, cost):
+
         # Generate a random price and production cost for each product
         price = [random.randint(100, 999) for _ in range(len(df))]
         df['price'] = price
@@ -83,20 +84,13 @@ class ETL:
 
         return df_time
 
-    def transform_table_sells(self, df_time, df_sells):
-        df_sells = self.__sum_equal_columns(df_sells)
+    @staticmethod
+    def __create_id_region(df):
+        # Create a dictionary to map month numbers to month names in Spanish.
+        id_region = {'Norte': 1, 'Sur': 2, 'Este': 3, 'Oeste': 4}
 
-        # An 'id_time' field is added to 'sells', which is a foreign key referencing the 'time' table
-        df_sells['id_time'] = pd.merge(df_sells, df_time, on='date', how='left')['id']
-
-        # The 'date' field is removed from the 'sells' table
-        df_sells = df_sells.drop('date', axis=1)
-        return df_sells
-
-    def transform_table_salesmen(self, df):
-        self.__separate_representative(df)
-        self.__generate_email(df)
-        self.__generate_phone_number(df)
+        # Apply the mapping to the 'Mes' column to get the name of the month in Spanish.
+        df['id_region'] = df['region'].map(id_region)
 
         return df
 
@@ -121,5 +115,20 @@ class ETL:
         # Extract the day from each date and store it in a new column 'day'.
         df['day'] = df['date'].dt.day
 
+    def transform_table_sells(self, df_time, df_sells):
+        df_sells = self.__sum_equal_columns(df_sells)
 
+        # An 'id_time' field is added to 'sells', which is a foreign key referencing the 'time' table
+        df_sells['id_time'] = pd.merge(df_sells, df_time, on='date', how='left')['id']
 
+        # The 'date' field is removed from the 'sells' table
+        df_sells = df_sells.drop('date', axis=1)
+        return df_sells
+
+    def transform_table_salesmen(self, df):
+        df = self.__create_id_region(df)
+        self.__separate_representative(df)
+        self.__generate_email(df)
+        self.__generate_phone_number(df)
+        df = df.drop('first_name', axis=1)
+        return df
