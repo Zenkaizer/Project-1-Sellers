@@ -58,5 +58,5 @@ class TimeETL:
     def load(self):
         for row in self.dataframe.to_numpy():
             query = 'INSERT INTO time (date, month_number, month_name, year, day) VALUES (\'%s\', %s, \'%s\', %s, %s)'\
-                    % (row[0].strftime('%Y-%m-%d'), row[1], row[2], row[3], row[4])
+                    % (row[0], row[1], row[2], row[3], row[4])
             self.connection.execute(query)
