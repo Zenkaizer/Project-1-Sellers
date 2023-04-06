@@ -1,12 +1,10 @@
 import random
 
-import openpyxl
 import pandas as pd
 import unicodedata
 
 
 class ETL:
-
 
     def __init__(self):
         pass
@@ -63,7 +61,6 @@ class ETL:
 
     @staticmethod
     def __generate_price_cost(df, cost):
-
         # Generate a random price and production cost for each product
         price = [random.randint(100, 999) for _ in range(len(df))]
         df['price'] = price
@@ -110,14 +107,13 @@ class ETL:
         self.__generate_year_column(df_new)
         self.__generate_day_column(df_new)
         return self.__generate_id_time(df_new)
+
     @staticmethod
     def __generate_day_column(df):
         # Extract the day from each date and store it in a new column 'day'.
         df['day'] = df['date'].dt.day
 
     def transform_table_sells(self, df_time, df_sells):
-        df_sells = self.__sum_equal_columns(df_sells)
-
         # An 'id_time' field is added to 'sells', which is a foreign key referencing the 'time' table
         df_sells['id_time'] = pd.merge(df_sells, df_time, on='date', how='left')['id']
 
