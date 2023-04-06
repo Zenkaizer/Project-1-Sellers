@@ -8,8 +8,8 @@ CREATE TABLE salesmen (
   representative varchar(255) NOT NULL UNIQUE,
   region         varchar(255) NOT NULL,
   id_region      int(10) NOT NULL,
-  email          varchar(255) NOT NULL UNIQUE,
   last_name      varchar(255) NOT NULL,
+  email          varchar(255) NOT NULL UNIQUE,
   contact_number int(10) NOT NULL,
   PRIMARY KEY (id));
 CREATE TABLE products (
