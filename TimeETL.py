@@ -17,6 +17,10 @@ class TimeETL:
         self.dataframe.columns = ['date', 'representative', 'product_code', 'units']
         self.dataframe.drop(columns=['representative', 'product_code', 'units'], inplace=True)
 
+    def __generate_autoincremental_id(self):
+        self.dataframe.reset_index(drop=True, inplace=True)
+        self.dataframe['id'] = self.dataframe.index + 1
+
     def __group_equal_columns(self):
         self.dataframe.drop_duplicates(inplace=True)
 
@@ -47,6 +51,9 @@ class TimeETL:
     def __generate_day(self):
         self.dataframe['day'] = self.dataframe['date'].dt.day
 
+    def get_dataframe(self):
+        return self.dataframe
+
     def transform(self):
         self.__normalize_columns()
         self.__group_equal_columns()
@@ -54,9 +61,11 @@ class TimeETL:
         self.__generate_month_name()
         self.__generate_year()
         self.__generate_day()
+        self.__generate_autoincremental_id()
 
     def load(self):
         for row in self.dataframe.to_numpy():
-            query = 'INSERT INTO time (date, month_number, month_name, year, day) VALUES (\'%s\', %s, \'%s\', %s, %s)'\
-                    % (row[0].strftime('%Y-%m-%d'), row[1], row[2], row[3], row[4])
+            query = 'INSERT INTO time (id, date, month_number, month_name, year, day) ' \
+                    'VALUES (%s, \'%s\', %s, \'%s\', %s, %s)'\
+                    % (row[5], row[0].strftime('%Y-%m-%d'), row[1], row[2], row[3], row[4])
             self.connection.execute(query)

@@ -114,8 +114,6 @@ class ETL:
         df['day'] = df['date'].dt.day
 
     def transform_table_sells(self, df_time, df_sells):
-        df_sells = self.__sum_equal_columns(df_sells)
-
         # An 'id_time' field is added to 'sells', which is a foreign key referencing the 'time' table
         df_sells['id_time'] = pd.merge(df_sells, df_time, on='date', how='left')['id']
 

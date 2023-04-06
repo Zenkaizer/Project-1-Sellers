@@ -15,6 +15,10 @@ class SalesmenETL:
     def __normalize_columns(self):
         self.dataframe.columns = ['representative', 'region']
 
+    def __generate_autoincremental_id(self):
+        self.dataframe.reset_index(drop=True, inplace=True)
+        self.dataframe['id'] = self.dataframe.index + 1
+
     def __generate_last_name(self):
         self.dataframe[['first_name', 'last_name']] = self.dataframe['representative'].str.split(' ', 1,
                                                                                                  expand=True)
@@ -40,18 +44,21 @@ class SalesmenETL:
         # Apply the mapping to the 'region' column to get the id_region.
         self.dataframe['id_region'] = self.dataframe['region'].map(id_region)
 
+    def get_dataframe(self):
+        return self.dataframe
+
     def transform(self):
         self.__normalize_columns()
+        self.__generate_autoincremental_id()
         self.__generate_id_region()
         self.__generate_last_name()
         self.__generate_email()
         self.__generate_contact_number()
-        self.dataframe.drop('first_name', axis=1)
+        self.dataframe.drop('first_name', axis=1, inplace=True)
 
     def load(self):
         for row in self.dataframe.to_numpy():
-            query = 'INSERT INTO salesmen (representative, region, id_region, last_name, email, contact_number) ' \
-                    'VALUES (\'%s\', \'%s\', %s, \'%s\', \'%s\', %s)' \
-                    % (row[0], row[1], row[2], row[3], row[4], row[5])
+            query = 'INSERT INTO salesmen (id, representative, region, id_region, last_name, email, contact_number) ' \
+                    'VALUES (%s, \'%s\', \'%s\', %s, \'%s\', \'%s\', %s)' \
+                    % (row[2], row[0], row[1], row[3], row[4], row[5], row[6])
             self.connection.execute(query)
-

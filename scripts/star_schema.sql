@@ -4,23 +4,23 @@ DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS time CASCADE;
 
 CREATE TABLE salesmen (
-  id             int(10) NOT NULL AUTO_INCREMENT,
+  id             int(10) NOT NULL,
   representative varchar(255) NOT NULL UNIQUE,
   region         varchar(255) NOT NULL,
   id_region      int(10) NOT NULL,
-  last_name      varchar(255) NOT NULL,
   email          varchar(255) NOT NULL UNIQUE,
+  last_name      varchar(255) NOT NULL,
   contact_number int(10) NOT NULL,
   PRIMARY KEY (id));
 CREATE TABLE products (
-  id           int(10) NOT NULL AUTO_INCREMENT,
+  id           int(10) NOT NULL,
   product_code varchar(255) NOT NULL UNIQUE,
   description  varchar(255) NOT NULL,
   price        int(10) NOT NULL,
   cost         int(10) NOT NULL,
   PRIMARY KEY (id));
 CREATE TABLE time (
-  id           int(10) NOT NULL AUTO_INCREMENT,
+  id           int(10) NOT NULL,
   `date`       date NOT NULL UNIQUE,
   month_number int(10) NOT NULL,
   month_name   varchar(255) NOT NULL,

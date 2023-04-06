@@ -27,7 +27,7 @@ products_etl.load()
 
 sells_etl = SellsETL(connection)
 sells_etl.extract('resources/DatosEjemplo.xlsx', 'Hoja1')
-sells_etl.transform(products_etl.get_dataframe())
+sells_etl.transform(products_etl.get_dataframe(), salesmen_etl.get_dataframe(), time_etl.get_dataframe())
 sells_etl.load()
 
 connection.close()
