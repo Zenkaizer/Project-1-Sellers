@@ -1,6 +1,5 @@
 import random
 
-import openpyxl
 import pandas as pd
 import unicodedata
 
@@ -56,19 +55,31 @@ class ETL:
 
     @staticmethod
     def __generate_phone_number(df):
+        # Generate a random phone for each salesman
         phone_numbers = [str(random.randint(10000000, 99999999)) for _ in range(len(df))]
         df['contact_number'] = phone_numbers
 
     @staticmethod
     def __generate_price_cost(df, cost):
+        # Generate a random price and production cost for each product
         price = [random.randint(100, 999) for _ in range(len(df))]
         df['price'] = price
         df['cost'] = (df['price'] * cost).astype(int)
 
     @staticmethod
     def __sum_equal_columns(df):
-        df_sum = df.groupby(['id_time', 'representative', 'product_code'], as_index=False).sum()
+        # Sum up the units sold for the same salesmen, product, and date
+        df_sum = df.groupby(['date', 'representative', 'product_code'], as_index=False).sum()
         return df_sum
+
+    @staticmethod
+    def __generate_id_time(df_time):
+        # Remove duplicate rows based on the 'date' column
+        df_time = df_time.drop_duplicates(subset=['date'])
+
+        df_time['id'] = range(1, len(df_time) + 1)
+
+        return df_time
 
     @staticmethod
     def __create_id_region(df):
@@ -78,14 +89,6 @@ class ETL:
         # Apply the mapping to the 'Mes' column to get the name of the month in Spanish.
         df['id_region'] = df['region'].map(id_region)
 
-        return df
-
-    def transform_table_salesmen(self, df):
-        df = self.__create_id_region(df)
-        self.__separate_representative(df)
-        self.__generate_email(df)
-        self.__generate_phone_number(df)
-        df = df.drop('first_name', axis=1)
         return df
 
     def transform_table_products(self, df):
@@ -102,17 +105,26 @@ class ETL:
         self.__generate_month_column(df_new)
         self.__generate_month_name(df_new)
         self.__generate_year_column(df_new)
+        self.__generate_day_column(df_new)
+        return self.__generate_id_time(df_new)
 
-        # Eliminamos las filas duplicadas basándonos en las columnas 'date'
-        df_new = df_new.drop_duplicates(subset=['date'])
-
-        df_new['id'] = range(1, len(df_new) + 1)
-
-        return df_new
+    @staticmethod
+    def __generate_day_column(df):
+        # Extract the day from each date and store it in a new column 'day'.
+        df['day'] = df['date'].dt.day
 
     def transform_table_sells(self, df_time, df_sells):
-
+        # An 'id_time' field is added to 'sells', which is a foreign key referencing the 'time' table
         df_sells['id_time'] = pd.merge(df_sells, df_time, on='date', how='left')['id']
-        df_sells = df_sells.drop('date', axis=1)
-        return self.__sum_equal_columns(df_sells)
 
+        # The 'date' field is removed from the 'sells' table
+        df_sells = df_sells.drop('date', axis=1)
+        return df_sells
+
+    def transform_table_salesmen(self, df):
+        df = self.__create_id_region(df)
+        self.__separate_representative(df)
+        self.__generate_email(df)
+        self.__generate_phone_number(df)
+        df = df.drop('first_name', axis=1)
+        return df
