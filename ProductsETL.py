@@ -24,7 +24,7 @@ class ProductsETL:
         self.dataframe['price'] = price
 
     def __generate_cost(self):
-        self.dataframe['cost'] = (self.dataframe['price'] * 0.8).astype(int)
+        self.dataframe['cost'] = (self.dataframe['price'] * random.randint(1, 9) / 10).astype(int)
 
     def get_dataframe(self):
         return self.dataframe

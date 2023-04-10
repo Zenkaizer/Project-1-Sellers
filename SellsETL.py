@@ -23,7 +23,7 @@ class SellsETL:
         df_merged = pandas.merge(self.dataframe, df_products[['product_code', 'price', 'cost']], on='product_code', how='left')
 
         # Calculate the "profit" column as the subtraction between the "price" column and the "cost" column
-        df_merged['profits'] = df_merged['price'] - df_merged['cost']
+        df_merged['profits'] = (df_merged['price'] - df_merged['cost']) * df_merged['units']
         df_merged.drop('price', axis=1, inplace=True)
         df_merged.drop('cost', axis=1, inplace=True)
         self.dataframe = df_merged
