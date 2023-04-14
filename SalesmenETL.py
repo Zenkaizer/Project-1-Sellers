@@ -32,10 +32,7 @@ class SalesmenETL:
         self.dataframe['email'] = self.dataframe['email'].str.replace('ñ', 'n')
 
     def __generate_contact_number(self):
-        phone_numbers = set()
-        while len(phone_numbers) < len(self.dataframe):
-            phone_numbers.add(str(random.randint(10000000, 99999999)))
-        self.dataframe['contact_number'] = list(phone_numbers)
+        self.dataframe['contact_number'] = random.sample(range(10000000, 99999999), len(self.dataframe))
 
     def __generate_id_region(self):
         # Create a dictionary to map month numbers to month names in Spanish.

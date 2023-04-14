@@ -14,7 +14,7 @@ class SellsETL:
         self.dataframe.columns = ['date', 'representative', 'product_code', 'units']
         self.dataframe.reindex(columns=['representative', 'product_code', 'date', 'units'])
 
-    def __sum_equal_columns(self):
+    def __sum_equal_rows(self):
         # Sum up the units sold for the same salesmen, product, and date
         self.dataframe = self.dataframe.groupby(['date', 'representative', 'product_code'], as_index=False).sum()
 
@@ -53,7 +53,7 @@ class SellsETL:
 
     def transform(self, df_products, df_salesmen, df_time):
         self.__normalize_columns()
-        self.__sum_equal_columns()
+        self.__sum_equal_rows()
         self.__generate_profits(df_products)
         self.__sync_id_products(df_products)
         self.__sync_id_salesmen(df_salesmen)

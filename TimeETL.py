@@ -31,7 +31,7 @@ class TimeETL:
         self.dataframe.reset_index(drop=True, inplace=True)
         self.dataframe['id'] = self.dataframe.index + 1
 
-    def __group_equal_columns(self):
+    def __group_equal_rows(self):
         """
         Group only unique dates
         :return: None
@@ -90,7 +90,7 @@ class TimeETL:
         :return: None
         """
         self.__normalize_columns()
-        self.__group_equal_columns()
+        self.__group_equal_rows()
         self.__generate_month_number()
         self.__generate_month_name()
         self.__generate_year()
