@@ -42,9 +42,6 @@ class SalesmenETL:
 
             assigned_phone_numbers.append(phone_numbers)
 
-            print(assigned_phone_numbers)
-            print(phone_numbers, 'hola')
-
         self.dataframe['contact_number'] = assigned_phone_numbers
 
     def __generate_id_region(self):
